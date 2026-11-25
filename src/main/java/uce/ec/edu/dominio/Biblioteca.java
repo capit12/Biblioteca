@@ -56,7 +56,7 @@ public class Biblioteca {
         return buscar(lector.getNombreCompleto());
     }
 
-    // Devuelve la posición del lector o -1 si no existe
+
     public int buscarIndice(Lector lector) {
         if (lector == null) {
             return -1;
