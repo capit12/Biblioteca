@@ -1,7 +1,8 @@
 package uce.ec.edu.dominio;
-
+import java.util.Arrays;
 
 public class Biblioteca {
+
     private Lector[] lectores;
     private int cantidad;
 
@@ -10,101 +11,97 @@ public class Biblioteca {
     }
 
     public Biblioteca(int tamano) {
-        if (tamano <= 0) {
-            throw new IllegalArgumentException("El tamaño debe ser mayor que 0.");
-        }
         this.lectores = new Lector[tamano];
         this.cantidad = 0;
     }
-
-    public int getCantidad() {
-        return cantidad;
+    //Metodo auxiliar
+    private void redimensionar() {
+        int nuevoTamano = lectores.length + 1;
+        lectores = Arrays.copyOf(lectores, nuevoTamano);
     }
 
-    public int getCapacidad() {
-        return lectores.length;
+    public Lector[] listarLectores() {
+        return Arrays.copyOf(lectores, cantidad);
     }
 
     public boolean agregarLector(Lector lector) {
-        if (lector == null || lector.getIdLector() == null || lector.getIdLector().isBlank()) {
+        if (lector == null || buscar(lector.getNombreCompleto()) != null) {
             return false;
         }
-        if (cantidad >= lectores.length) {
-            return false;
+        if (cantidad == lectores.length) {
+            redimensionar();
         }
-        if (buscarPorId(lector.getIdLector()) != null) {
-            return false;
-        }
-
         lectores[cantidad] = lector;
         cantidad++;
         return true;
     }
 
-    public Lector buscarPorId(String idLector) {
-        if (idLector == null || idLector.isBlank()) {
+
+    public Lector buscar(String nombreCompleto) {
+        if (nombreCompleto == null) {
             return null;
         }
         for (int i = 0; i < cantidad; i++) {
-            if (idLector.equals(lectores[i].getIdLector())) {
+            if (lectores[i].getNombreCompleto().equals(nombreCompleto)) {
                 return lectores[i];
             }
         }
         return null;
     }
 
-    public Lector[] listarLectores() {
-        Lector[] resultado = new Lector[cantidad];
-        for (int i = 0; i < cantidad; i++) {
-            resultado[i] = lectores[i];
+    public Lector buscarLector(Lector lector) {
+        if (lector == null) {
+            return null;
         }
-        return resultado;
+        return buscar(lector.getNombreCompleto());
     }
 
-
-    public boolean actualizarLector(String idLector, String nuevoNombre, String nuevoCorreo, boolean estaActivo) {
-        int indice = buscarIndicePorId(idLector);
-        if (indice == -1) {
-            return false;
-        }
-
-        Lector lectorExistente = lectores[indice];
-        if (nuevoNombre != null && !nuevoNombre.isBlank()) {
-            lectorExistente.setNombreCompleto(nuevoNombre);
-        }
-        if (nuevoCorreo != null && !nuevoCorreo.isBlank()) {
-            lectorExistente.setCorreoInstitucional(nuevoCorreo);
-        }
-        lectorExistente.setEstaActivo(estaActivo);
-        return true;
-    }
-
-
-    public boolean eliminarLector(String idLector) {
-        int indice = buscarIndicePorId(idLector);
-        if (indice == -1) {
-            return false;
-        }
-
-
-        for (int i = indice; i < cantidad - 1; i++) {
-            lectores[i] = lectores[i + 1];
-        }
-
-        lectores[cantidad - 1] = null;
-        cantidad--;
-        return true;
-    }
-
-    private int buscarIndicePorId(String idLector) {
-        if (idLector == null || idLector.isBlank()) {
+    // Devuelve la posición del lector o -1 si no existe
+    public int buscarIndice(Lector lector) {
+        if (lector == null) {
             return -1;
         }
         for (int i = 0; i < cantidad; i++) {
-            if (idLector.equals(lectores[i].getIdLector())) {
+            if (lectores[i].getNombreCompleto().equals(lector.getNombreCompleto())) {
                 return i;
             }
         }
         return -1;
+    }
+
+    public boolean actualizar(String nombreCompleto, String nuevo) {
+        Lector lector = buscar(nombreCompleto);
+        if (lector == null || nuevo == null) {
+            return false;
+        }
+        lector.setNombreCompleto(nuevo);
+        return true;
+    }
+
+
+    public boolean actualizar(Lector lec, String nuevo) {
+        Lector encontrado = buscarLector(lec);
+        if (encontrado == null || nuevo == null) {
+            return false;
+        }
+        encontrado.setNombreCompleto(nuevo);
+        return true;
+    }
+
+    public boolean eliminar(String nombreCompleto) {
+        if (nombreCompleto == null) {
+            return false;
+        }
+        for (int i = 0; i < cantidad; i++) {
+            if (nombreCompleto.equals(lectores[i].getNombreCompleto())) {
+                for (int j = i; j < cantidad - 1; j++) {
+                    lectores[j] = lectores[j + 1];
+                }
+                lectores[cantidad - 1] = null;
+                cantidad--;
+                return true;
+            }
+        }
+        return false;
     }
 }
